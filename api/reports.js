@@ -3,6 +3,7 @@ const router = express.Router();
 const { connectToDatabase } = require('./db');
 const { notifyAmbulanceService } = require('./services/ambulanceService');
 const { reverseGeocode } = require('./services/geocodingService');
+const { createDispatch } = require('./services/dispatchService');
 
 // Submit a new report
 router.post('/', async (req, res) => {
@@ -23,7 +24,7 @@ router.post('/', async (req, res) => {
     }
 
     // Connect to database
-    const { Report } = await connectToDatabase();
+    const { Report, Dispatch, AmbulanceStation, Ambulance } = await connectToDatabase();
 
     // Reverse geocode to get address details
     let addressDetails = {
@@ -61,24 +62,27 @@ router.post('/', async (req, res) => {
 
     await report.save();
 
-    // Notify ambulance service
-    let ambulanceNotified = false;
+    // Smart Dispatch: Find and assign nearest ambulance
+    let dispatchInfo = null;
     try {
-      const ambulanceResponse = await notifyAmbulanceService(report);
-      report.ambulanceNotified = true;
-      report.ambulanceResponse = ambulanceResponse;
-      report.status = 'dispatched';
-      await report.save();
-      ambulanceNotified = true;
-    } catch (ambulanceError) {
-      console.error('Ambulance notification error:', ambulanceError.message);
+      dispatchInfo = await createDispatch(report, Dispatch, AmbulanceStation, Ambulance);
+      console.log('Dispatch created successfully:', dispatchInfo);
+    } catch (dispatchError) {
+      console.error('Dispatch error:', dispatchError.message);
+      // Continue even if dispatch fails
     }
 
     res.status(201).json({
       success: true,
       message: 'Report submitted successfully',
       reportId: report._id,
-      ambulanceNotified,
+      ambulanceNotified: dispatchInfo ? true : false,
+      dispatch: dispatchInfo ? {
+        station: dispatchInfo.station,
+        ambulance: dispatchInfo.ambulance,
+        distance: dispatchInfo.distance,
+        estimatedArrival: dispatchInfo.estimatedArrival,
+      } : null,
     });
   } catch (error) {
     console.error('Error creating report:', error);
