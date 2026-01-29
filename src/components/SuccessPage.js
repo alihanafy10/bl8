@@ -9,10 +9,21 @@ const SuccessPage = ({ reportData, onNewReport }) => {
       
       <div className="success-message">
         <p>Your incident report has been received and forwarded to emergency services.</p>
-        {reportData?.ambulanceNotified && (
-          <p className="ambulance-status">
-            🚑 <strong>Ambulance service has been notified</strong>
-          </p>
+        {reportData?.ambulanceNotified && reportData?.dispatch && (
+          <div className="dispatch-info">
+            <p className="ambulance-status">
+              🚑 <strong>Ambulance Dispatched!</strong>
+            </p>
+            <div className="dispatch-details">
+              <p><strong>Station:</strong> {reportData.dispatch.station.name}</p>
+              <p><strong>Location:</strong> {reportData.dispatch.station.address}</p>
+              {reportData.dispatch.ambulance && (
+                <p><strong>Ambulance:</strong> {reportData.dispatch.ambulance.vehicleNumber}</p>
+              )}
+              <p><strong>Distance:</strong> {reportData.dispatch.distance} km</p>
+              <p><strong>Estimated Arrival:</strong> {reportData.dispatch.estimatedArrival} minutes</p>
+            </div>
+          </div>
         )}
       </div>
 
