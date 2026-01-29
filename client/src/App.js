@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import CameraCapture from './components/CameraCapture';
-import LocationSelector from './components/LocationSelector';
-import ReportSubmission from './components/ReportSubmission';
+import PhotoCapture from './components/PhotoCapture';
+import LocationForm from './components/LocationForm';
+import ReportSubmit from './components/ReportSubmit';
 import './App.css';
 
 function App() {
@@ -15,18 +15,12 @@ function App() {
     description: ''
   });
 
-  const updateReportData = (data) => {
+  const updateData = (data) => {
     setReportData(prev => ({ ...prev, ...data }));
   };
 
-  const nextStep = () => {
-    setStep(prev => prev + 1);
-  };
-
-  const prevStep = () => {
-    setStep(prev => prev - 1);
-  };
-
+  const nextStep = () => setStep(prev => prev + 1);
+  const prevStep = () => setStep(prev => prev - 1);
   const resetForm = () => {
     setStep(1);
     setReportData({
@@ -37,39 +31,6 @@ function App() {
       region: null,
       description: ''
     });
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case 1:
-        return (
-          <CameraCapture
-            reportData={reportData}
-            updateReportData={updateReportData}
-            nextStep={nextStep}
-          />
-        );
-      case 2:
-        return (
-          <LocationSelector
-            reportData={reportData}
-            updateReportData={updateReportData}
-            nextStep={nextStep}
-            prevStep={prevStep}
-          />
-        );
-      case 3:
-        return (
-          <ReportSubmission
-            reportData={reportData}
-            updateReportData={updateReportData}
-            prevStep={prevStep}
-            resetForm={resetForm}
-          />
-        );
-      default:
-        return null;
-    }
   };
 
   return (
@@ -98,7 +59,9 @@ function App() {
         </div>
 
         <div className="step-content">
-          {renderStep()}
+          {step === 1 && <PhotoCapture data={reportData} updateData={updateData} nextStep={nextStep} />}
+          {step === 2 && <LocationForm data={reportData} updateData={updateData} nextStep={nextStep} prevStep={prevStep} />}
+          {step === 3 && <ReportSubmit data={reportData} updateData={updateData} prevStep={prevStep} resetForm={resetForm} />}
         </div>
       </div>
     </div>
