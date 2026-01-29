@@ -10,8 +10,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Import routers
 const reportsRouter = require('./reports');
-const driverRouter = require('./driver');
+const paramedicRouter = require('./paramedic');
 const adminRouter = require('./admin');
+const { router: authRouter } = require('./auth');
 
 // Health check
 app.get('/health', (req, res) => {
@@ -19,8 +20,9 @@ app.get('/health', (req, res) => {
 });
 
 // Routes - No /api prefix needed, Vercel handles that
+app.use('/auth', authRouter);
 app.use('/reports', reportsRouter);
-app.use('/driver', driverRouter);
+app.use('/paramedic', paramedicRouter);
 app.use('/admin', adminRouter);
 
 // Export for Vercel
