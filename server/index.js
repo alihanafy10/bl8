@@ -191,8 +191,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`Ambulance API URL: ${process.env.AMBULANCE_API_URL || 'Not configured (Mock mode)'}`);
-});
+// Only listen on port if not in serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Ambulance API URL: ${process.env.AMBULANCE_API_URL || 'Not configured (Mock mode)'}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
