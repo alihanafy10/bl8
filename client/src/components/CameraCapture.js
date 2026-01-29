@@ -59,11 +59,10 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
+      stopCamera();
     };
-  }, [stream]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Detect face in video
   const detectFace = async () => {
