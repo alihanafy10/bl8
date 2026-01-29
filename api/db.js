@@ -5,6 +5,8 @@ let Report = null;
 let AmbulanceStation = null;
 let Ambulance = null;
 let Dispatch = null;
+let Admin = null;
+let Paramedic = null;
 
 // Report Schema (Updated with dispatch tracking)
 const reportSchema = new mongoose.Schema({
@@ -116,22 +118,45 @@ const dispatchSchema = new mongoose.Schema({
   report: { type: mongoose.Schema.Types.ObjectId, ref: 'Report', required: true },
   station: { type: mongoose.Schema.Types.ObjectId, ref: 'AmbulanceStation', required: true },
   ambulance: { type: mongoose.Schema.Types.ObjectId, ref: 'Ambulance', default: null },
+  paramedic: { type: mongoose.Schema.Types.ObjectId, ref: 'Paramedic', default: null },
   status: {
     type: String,
-    enum: ['pending', 'assigned', 'accepted', 'en_route', 'arrived', 'completed', 'cancelled'],
+    enum: ['pending', 'dispatched', 'arrived', 'completed', 'cancelled'],
     default: 'pending'
   },
   timeline: {
     dispatched: { type: Date, default: Date.now },
-    assigned: Date,
-    accepted: Date,
-    departed: Date,
     arrived: Date,
     completed: Date,
   },
   distance: { type: Number, default: 0 },
   estimatedArrival: { type: Number, default: 0 },
-  driverNotes: String,
+  paramedicNotes: String,
+}, { timestamps: true });
+
+// Admin Schema
+const adminSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  role: { type: String, default: 'admin', enum: ['admin', 'super_admin'] },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
+
+// Paramedic Schema
+const paramedicSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  ambulance: { type: mongoose.Schema.Types.ObjectId, ref: 'Ambulance', default: null },
+  station: { type: mongoose.Schema.Types.ObjectId, ref: 'AmbulanceStation', default: null },
+  isActive: { type: Boolean, default: true },
+  currentLocation: {
+    latitude: Number,
+    longitude: Number,
+    lastUpdated: Date,
+  },
 }, { timestamps: true });
 
 async function connectToDatabase() {
@@ -166,9 +191,15 @@ async function connectToDatabase() {
     if (!Dispatch) {
       Dispatch = mongoose.models.Dispatch || mongoose.model('Dispatch', dispatchSchema);
     }
+    if (!Admin) {
+      Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
+    }
+    if (!Paramedic) {
+      Paramedic = mongoose.models.Paramedic || mongoose.model('Paramedic', paramedicSchema);
+    }
 
     console.log('MongoDB Connected');
-    return { Report, AmbulanceStation, Ambulance, Dispatch };
+    return { Report, AmbulanceStation, Ambulance, Dispatch, Admin, Paramedic };
   } catch (error) {
     console.error('MongoDB connection error:', error);
     throw error;

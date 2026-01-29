@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
     }
 
     // Connect to database
-    const { Report, Dispatch, AmbulanceStation, Ambulance } = await connectToDatabase();
+    const { Report, Dispatch, AmbulanceStation, Ambulance, Paramedic } = await connectToDatabase();
 
     // Reverse geocode to get address details
     let addressDetails = {
@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
     // Smart Dispatch: Find and assign nearest ambulance
     let dispatchInfo = null;
     try {
-      dispatchInfo = await createDispatch(report, Dispatch, AmbulanceStation, Ambulance);
+      dispatchInfo = await createDispatch(report, Dispatch, AmbulanceStation, Ambulance, Paramedic);
       console.log('Dispatch created successfully:', dispatchInfo);
     } catch (dispatchError) {
       console.error('Dispatch error:', dispatchError.message);

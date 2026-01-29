@@ -87,7 +87,7 @@ async function findBestStation(reportLocation, governorate, AmbulanceStation) {
 /**
  * Create a dispatch and assign to station
  */
-async function createDispatch(report, Dispatch, AmbulanceStation, Ambulance) {
+async function createDispatch(report, Dispatch, AmbulanceStation, Ambulance, Paramedic) {
   try {
     // Find best station
     const bestMatch = await findBestStation(
@@ -114,18 +114,27 @@ async function createDispatch(report, Dispatch, AmbulanceStation, Ambulance) {
       status: 'available',
     });
 
+    // Find paramedic assigned to this ambulance
+    let paramedic = null;
+    if (ambulance && Paramedic) {
+      paramedic = await Paramedic.findOne({
+        ambulance: ambulance._id,
+        isActive: true,
+      });
+    }
+
     // Create dispatch record
     const dispatch = new Dispatch({
       report: report._id,
       station: station._id,
       ambulance: ambulance ? ambulance._id : null,
-      status: ambulance ? 'assigned' : 'pending',
+      paramedic: paramedic ? paramedic._id : null,
+      status: ambulance ? 'dispatched' : 'pending',
       priority: 'high',
       distance: distance.toFixed(2),
       estimatedArrival: estimatedArrival,
       timeline: {
         dispatched: new Date(),
-        assigned: ambulance ? new Date() : null,
       },
     });
 

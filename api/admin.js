@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { connectToDatabase } = require('./db');
+const { verifyToken, verifyAdmin } = require('./auth');
 
 // Get all stations with availability
-router.get('/stations', async (req, res) => {
+router.get('/stations', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { AmbulanceStation } = await connectToDatabase();
     
@@ -18,7 +19,7 @@ router.get('/stations', async (req, res) => {
 });
 
 // Create new ambulance station
-router.post('/stations', async (req, res) => {
+router.post('/stations', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { name, governorate, district, location, address, contactPhone, totalAmbulances } = req.body;
     const { AmbulanceStation } = await connectToDatabase();
@@ -48,7 +49,7 @@ router.post('/stations', async (req, res) => {
 });
 
 // Get all ambulances
-router.get('/ambulances', async (req, res) => {
+router.get('/ambulances', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { Ambulance } = await connectToDatabase();
     
@@ -65,7 +66,7 @@ router.get('/ambulances', async (req, res) => {
 });
 
 // Create new ambulance
-router.post('/ambulances', async (req, res) => {
+router.post('/ambulances', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { vehicleNumber, stationId, driver, equipment } = req.body;
     const { Ambulance } = await connectToDatabase();
@@ -92,7 +93,7 @@ router.post('/ambulances', async (req, res) => {
 });
 
 // Get all dispatches with filters
-router.get('/dispatches', async (req, res) => {
+router.get('/dispatches', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { status, governorate, fromDate, toDate } = req.query;
     const { Dispatch } = await connectToDatabase();
@@ -132,7 +133,7 @@ router.get('/dispatches', async (req, res) => {
 });
 
 // Get dashboard statistics
-router.get('/stats', async (req, res) => {
+router.get('/stats', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { Report, Dispatch, AmbulanceStation, Ambulance } = await connectToDatabase();
     
@@ -214,8 +215,60 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// Get all paramedics
+router.get('/paramedics', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { Paramedic } = await connectToDatabase();
+    
+    const paramedics = await Paramedic.find()
+      .populate('ambulance')
+      .populate('station')
+      .select('-password')
+      .sort({ name: 1 });
+
+    res.json({ paramedics });
+  } catch (error) {
+    console.error('Error fetching paramedics:', error);
+    res.status(500).json({ error: 'Failed to fetch paramedics' });
+  }
+});
+
+// Update station location
+router.put('/stations/:id', verifyToken, verifyAdmin, async (req, res) => {
+  try {
+    const { location, address, contactPhone, totalAmbulances, isActive } = req.body;
+    const { AmbulanceStation } = await connectToDatabase();
+    
+    const updateData = {};
+    if (location) updateData.location = location;
+    if (address) updateData.address = address;
+    if (contactPhone) updateData.contactPhone = contactPhone;
+    if (totalAmbulances !== undefined) updateData.totalAmbulances = totalAmbulances;
+    if (isActive !== undefined) updateData.isActive = isActive;
+
+    const station = await AmbulanceStation.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!station) {
+      return res.status(404).json({ error: 'Station not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Station updated successfully',
+      station,
+    });
+  } catch (error) {
+    console.error('Error updating station:', error);
+    res.status(500).json({ error: 'Failed to update station' });
+  }
+});
+
 // Get real-time map data (all active dispatches with locations)
-router.get('/map', async (req, res) => {
+router.get('/map', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { Dispatch } = await connectToDatabase();
     
