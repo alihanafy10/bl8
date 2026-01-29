@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CameraCapture from './components/CameraCapture';
+import SimpleCameraCapture from './components/SimpleCameraCapture';
 import LocationSelector from './components/LocationSelector';
 import ReportSubmission from './components/ReportSubmission';
 import './App.css';

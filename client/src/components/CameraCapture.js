@@ -235,7 +235,16 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   <div className="camera-controls">
-                    <button className="btn btn-primary" onClick={capturePhoto}>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={capturePhoto}
+                      disabled={!isCameraActive}
+                      style={{ 
+                        fontSize: '16px', 
+                        padding: '12px 24px',
+                        minWidth: '150px'
+                      }}
+                    >
                       📷 Capture Incident
                     </button>
                     <button className="btn btn-secondary" onClick={stopCamera}>
@@ -280,7 +289,16 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
                     <div className="detection-status">{detectionStatus}</div>
                   )}
                   <div className="camera-controls">
-                    <button className="btn btn-primary" onClick={capturePhoto}>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={capturePhoto}
+                      disabled={!isCameraActive}
+                      style={{ 
+                        fontSize: '16px', 
+                        padding: '12px 24px',
+                        minWidth: '150px'
+                      }}
+                    >
                       📷 Capture Face
                     </button>
                     <button className="btn btn-secondary" onClick={stopCamera}>
