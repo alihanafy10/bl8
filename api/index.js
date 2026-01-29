@@ -14,14 +14,14 @@ const driverRouter = require('./driver');
 const adminRouter = require('./admin');
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });
 });
 
-// Routes
-app.use('/api/reports', reportsRouter);
-app.use('/api/driver', driverRouter);
-app.use('/api/admin', adminRouter);
+// Routes - No /api prefix needed, Vercel handles that
+app.use('/reports', reportsRouter);
+app.use('/driver', driverRouter);
+app.use('/admin', adminRouter);
 
 // Export for Vercel
 module.exports = app;
