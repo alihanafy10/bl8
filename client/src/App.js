@@ -43,7 +43,7 @@ function App() {
     switch (step) {
       case 1:
         return (
-          <SimpleCameraCapture
+          <CameraCapture
             reportData={reportData}
             updateReportData={updateReportData}
             nextStep={nextStep}
