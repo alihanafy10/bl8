@@ -1,366 +1,329 @@
 # 🚑 Emergency Incident Reporter
 
-A comprehensive web application for emergency incident reporting with photo capture, face verification, and location tracking. Built specifically for Egyptian emergency services.
+A full-stack web application that allows users to report emergency incidents with photo verification and automatic ambulance service notification. The application captures incident photos, user face verification, and location data to ensure authentic and actionable reports.
 
-## Features
+## ✨ Features
 
-- 📸 **Photo Capture**: Capture incident photos and selfie verification using device camera
-- 👤 **Face Detection**: Automatic face detection for identity verification
-- 📍 **GPS Location**: Automatic location detection with coordinates
-- 🗺️ **Egyptian Locations**: Complete database of Egyptian governorates and regions
-- 🚨 **Emergency Dispatch**: Direct API integration with ambulance services
-- 📱 **Responsive Design**: Works on desktop, tablet, and mobile devices
-- 🔒 **Secure**: Photos and location data are securely transmitted
+- **📸 Dual Photo Capture**: Capture incident scene and reporter's face for verification
+- **🎥 React Webcam Integration**: Uses `react-webcam` for seamless photo capture
+- **📍 Automatic Geolocation**: Captures user's GPS coordinates
+- **🗺️ Reverse Geocoding**: Automatically detects governorate and district
+- **🚑 Ambulance Integration**: Forwards reports to emergency services API
+- **💾 MongoDB Database**: Stores all reports with full details
+- **📱 Responsive Design**: Works on desktop and mobile devices
+- **🔒 Secure**: Photo verification ensures report authenticity
 
-## Technology Stack
+## 🏗️ Tech Stack
 
 ### Frontend
 - React 18
-- face-api.js for face detection
-- Axios for API calls
-- Native browser APIs (Camera, Geolocation)
+- React Webcam
+- Axios
+- CSS3 (Custom styling)
 
 ### Backend
-- Node.js with Express
-- Multer for file uploads
-- Axios for external API calls
-- Complete Egyptian governorate database
+- Node.js
+- Express.js
+- MongoDB with Mongoose
+- Helmet (Security)
+- Compression
+- CORS
 
-## Prerequisites
+### Deployment
+- Railway (recommended)
+- GitHub integration
 
-- Node.js (v14 or higher)
-- npm or yarn
-- Modern web browser with camera and location support
-- HTTPS connection (required for camera/location APIs in production)
+## 🚀 Quick Start
 
-## Installation
+### Prerequisites
+- Node.js 18+ and npm
+- MongoDB (local or cloud instance like MongoDB Atlas)
+- Git
 
-### 1. Clone and Install Dependencies
+### Local Development
 
-```bash
-# Install root dependencies
-npm install
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd incident-reporter
+   ```
 
-# Install client dependencies
-cd client
-npm install
-cd ..
-```
+2. **Install dependencies**
+   ```bash
+   npm run install-all
+   ```
+   Or manually:
+   ```bash
+   npm install
+   cd client && npm install && cd ..
+   ```
 
-### 2. Download Face Detection Models
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and add your configuration:
+   ```env
+   PORT=5000
+   NODE_ENV=development
+   MONGODB_URI=mongodb://localhost:27017/incident-reporter
+   GEOCODING_API_KEY=your_opencage_api_key
+   AMBULANCE_API_URL=https://your-ambulance-service.com/api
+   AMBULANCE_API_KEY=your_ambulance_api_key
+   CLIENT_URL=http://localhost:3000
+   ```
 
-The application uses face-api.js for face detection. Download the models:
+4. **Start development servers**
+   ```bash
+   npm run dev
+   ```
+   
+   This starts:
+   - Backend server on `http://localhost:5000`
+   - React dev server on `http://localhost:3000`
 
-```bash
-# Create models directory
-mkdir -p client/public/models
+5. **Access the application**
+   
+   Open your browser to `http://localhost:3000`
 
-# Download tiny face detector model (lightweight, ~300KB)
-# Visit: https://github.com/justadudewhohacks/face-api.js/tree/master/weights
-# Download these files to client/public/models/:
-# - tiny_face_detector_model-weights_manifest.json
-# - tiny_face_detector_model-shard1
-```
+## 🌐 API Endpoints
 
-**Quick download using curl:**
+### Reports API
 
-```bash
-cd client/public/models
-curl -O https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/tiny_face_detector_model-weights_manifest.json
-curl -O https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/tiny_face_detector_model-shard1
-cd ../../..
-```
+#### Create Report
+```http
+POST /api/reports
+Content-Type: application/json
 
-### 3. Configure Environment Variables
-
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Edit .env file with your settings
-```
-
-**Environment Variables:**
-
-```env
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-
-# Ambulance Service API Configuration
-AMBULANCE_API_URL=https://api.ambulance-service.example.com/reports
-AMBULANCE_API_KEY=your_api_key_here
-
-# Optional: Enable API authentication
-API_AUTH_ENABLED=false
-API_AUTH_TOKEN=your_auth_token_here
-```
-
-## Running the Application
-
-### Development Mode
-
-```bash
-# Run both frontend and backend simultaneously
-npm run dev
-
-# OR run separately:
-
-# Terminal 1 - Backend
-npm run server
-
-# Terminal 2 - Frontend
-npm run client
-```
-
-The application will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-
-### Production Build
-
-```bash
-# Build the React app
-npm run build
-
-# Start production server
-NODE_ENV=production npm start
-```
-
-## API Endpoints
-
-### Backend API
-
-#### Health Check
-```
-GET /api/health
-```
-
-#### Get All Governorates
-```
-GET /api/governorates
-```
-
-#### Get Regions by Governorate
-```
-GET /api/governorates/:governorate/regions
-```
-
-#### Submit Incident Report
-```
-POST /api/report
-Content-Type: multipart/form-data
-
-Fields:
-- incidentPhoto: File (required)
-- facePhoto: File (required)
-- latitude: Number (required)
-- longitude: Number (required)
-- governorate: String (required)
-- region: String (optional)
-- description: String (optional)
-- timestamp: ISO String (optional)
-```
-
-## Usage Guide
-
-### For End Users
-
-1. **Step 1: Capture Photos**
-   - Take a photo of the incident
-   - Take a selfie for verification (face will be automatically detected)
-
-2. **Step 2: Location Information**
-   - Allow location access when prompted
-   - Select your governorate from the dropdown
-   - Optionally select your specific region/city
-   - Add a brief description (optional)
-
-3. **Step 3: Review & Submit**
-   - Review all information
-   - Submit report to emergency services
-   - Save your Report ID for reference
-
-### For Developers
-
-#### Integrating with Ambulance Service API
-
-The application sends reports in the following format:
-
-```json
 {
-  "timestamp": "2024-01-15T10:30:00.000Z",
+  "incidentPhoto": "data:image/jpeg;base64,...",
+  "faceVerificationPhoto": "data:image/jpeg;base64,...",
   "location": {
-    "latitude": 30.0444,
-    "longitude": 31.2357,
-    "governorate": "Cairo",
-    "region": "Nasr City"
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "governorate": "New York",
+    "district": "Manhattan"
   },
-  "description": "Traffic accident on Ring Road",
-  "photos": {
-    "incident": "incident-1234567890.jpg",
-    "face": "face-1234567890.jpg"
-  },
-  "reportId": "RPT-1234567890-ABC123"
+  "notes": "Optional description"
 }
 ```
 
-Configure your API endpoint in the `.env` file:
-
-```env
-AMBULANCE_API_URL=https://your-api.com/endpoint
-AMBULANCE_API_KEY=your_secret_key
+#### Get Report by ID
+```http
+GET /api/reports/:id
 ```
 
-## Project Structure
+#### List Reports
+```http
+GET /api/reports?page=1&limit=10
+```
+
+### Health Check
+```http
+GET /api/health
+```
+
+## 🚂 Railway Deployment
+
+### Step 1: Prepare Your Code
+
+1. **Push to GitHub**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit: Emergency Incident Reporter"
+   git branch -M main
+   git remote add origin <your-github-repo-url>
+   git push -u origin main
+   ```
+
+### Step 2: Deploy to Railway
+
+1. **Sign up/Login to Railway**
+   - Go to [railway.app](https://railway.app)
+   - Sign in with GitHub
+
+2. **Create New Project**
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Select your repository
+
+3. **Add MongoDB**
+   - Click "New" → "Database" → "Add MongoDB"
+   - Railway will automatically provision a MongoDB instance
+   - Copy the connection string
+
+4. **Configure Environment Variables**
+   
+   In Railway dashboard, go to your service → Variables:
+   ```env
+   NODE_ENV=production
+   MONGODB_URI=<railway-mongodb-connection-string>
+   GEOCODING_API_KEY=<your-opencage-api-key>
+   AMBULANCE_API_URL=<your-ambulance-service-url>
+   AMBULANCE_API_KEY=<your-ambulance-api-key>
+   CLIENT_URL=<your-railway-app-url>
+   ```
+
+5. **Deploy**
+   - Railway will automatically build and deploy
+   - Your app will be available at `https://your-app.railway.app`
+
+### Step 3: Get API Keys
+
+#### OpenCage Geocoding API (Free Tier)
+1. Sign up at [opencagedata.com](https://opencagedata.com/api)
+2. Get your free API key (2,500 requests/day)
+3. Add to Railway environment variables
+
+#### Alternative: Google Maps Geocoding
+1. Sign up at [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable Geocoding API
+3. Get API key
+4. Uncomment Google Maps code in `server/services/geocodingService.js`
+
+## 📁 Project Structure
 
 ```
 incident-reporter/
-├── client/                     # React frontend
+├── client/                      # React frontend
 │   ├── public/
-│   │   ├── models/            # Face detection models
-│   │   └── index.html
+│   │   ├── index.html
+│   │   └── manifest.json
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── CameraCapture.js
-│   │   │   ├── LocationSelector.js
-│   │   │   └── ReportSubmission.js
+│   │   │   ├── IncidentReporter.js
+│   │   │   ├── IncidentReporter.css
+│   │   │   ├── SuccessPage.js
+│   │   │   └── SuccessPage.css
 │   │   ├── App.js
 │   │   ├── App.css
 │   │   ├── index.js
 │   │   └── index.css
 │   └── package.json
-├── server/                     # Node.js backend
-│   ├── data/
-│   │   └── governorates.js    # Egyptian locations
-│   └── index.js               # Express server
-├── .env.example               # Environment template
+├── server/                      # Node.js backend
+│   ├── config/
+│   │   └── database.js         # MongoDB connection
+│   ├── models/
+│   │   └── Report.js           # Report schema
+│   ├── routes/
+│   │   └── reports.js          # API routes
+│   ├── services/
+│   │   ├── ambulanceService.js # Ambulance notification
+│   │   └── geocodingService.js # Reverse geocoding
+│   └── index.js                # Express server
+├── .env.example                # Example environment variables
 ├── .gitignore
 ├── package.json
+├── railway.json                # Railway configuration
+├── nixpacks.toml              # Nixpacks build config
 └── README.md
 ```
 
-## Browser Compatibility
+## 🔧 Configuration
 
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-- Opera 76+
+### Geocoding Service
 
-**Required Browser Features:**
-- Camera API (getUserMedia)
-- Geolocation API
-- ES6+ JavaScript support
+The app uses OpenCage Geocoding API by default. To switch to Google Maps:
 
-## Security Considerations
+1. Uncomment the Google Maps function in `server/services/geocodingService.js`
+2. Update the `reverseGeocode` export
+3. Add Google Maps API key to environment variables
 
-1. **HTTPS Required**: Camera and geolocation APIs require HTTPS in production
-2. **API Keys**: Never commit `.env` file with real API keys
-3. **File Upload Limits**: Maximum 10MB per photo
-4. **Validation**: All inputs are validated on both client and server
-5. **CORS**: Configure CORS appropriately for production
+### Ambulance Service Integration
 
-## Troubleshooting
+Configure your ambulance service endpoint in `.env`:
 
-### Camera not working
-- Ensure HTTPS is used (required for camera API)
-- Check browser permissions
-- Try a different browser
+```env
+AMBULANCE_API_URL=https://ambulance-service.example.com/api/reports
+AMBULANCE_API_KEY=your_api_key
+```
 
-### Location not detected
-- Enable location services on device
-- Allow location permission in browser
-- Check if GPS/location services are working
-
-### Face detection not working
-- Ensure models are downloaded correctly
-- Check browser console for errors
-- Face detection will allow capture even if it fails
-
-### API submission fails
-- Check `.env` configuration
-- Verify API endpoint is accessible
-- Check network connection
-- Review server logs for errors
-
-## Deployment
-
-### Deploying to Production
-
-1. **Prepare Environment**
-   ```bash
-   npm run build
-   ```
-
-2. **Configure Environment Variables**
-   - Set `NODE_ENV=production`
-   - Configure your ambulance API URL and key
-   - Set appropriate PORT
-
-3. **Deploy Options**
-   - **Heroku**: Use Heroku buildpacks
-   - **AWS**: Deploy to EC2 or Elastic Beanstalk
-   - **DigitalOcean**: Use App Platform
-   - **Docker**: Create Dockerfile for containerization
-
-4. **SSL Certificate**
-   - Camera and location APIs require HTTPS
-   - Use Let's Encrypt or cloud provider SSL
-
-### Example Nginx Configuration
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name your-domain.com;
-
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
+The payload sent to the ambulance service:
+```json
+{
+  "reportId": "mongodb_object_id",
+  "location": {
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "governorate": "New York",
+    "district": "Manhattan",
+    "address": "Full address string"
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "priority": "high",
+  "notes": "Additional details"
 }
 ```
 
-## Contributing
+## 📱 Usage Guide
 
-Contributions are welcome! Please follow these steps:
+### For Users
+
+1. **Allow Permissions**
+   - Grant camera access when prompted
+   - Allow location access for accurate reporting
+
+2. **Capture Incident Photo**
+   - Point camera at the incident
+   - Click "Capture Photo"
+   - Review and continue or retake
+
+3. **Face Verification**
+   - Camera switches to front-facing
+   - Capture clear photo of your face
+   - Review and continue
+
+4. **Review & Submit**
+   - Review both photos
+   - Add optional notes
+   - Verify location is detected
+   - Click "Submit Report"
+
+5. **Confirmation**
+   - Receive report ID
+   - Ambulance notification status
+   - Emergency instructions
+
+## 🔐 Security Features
+
+- **Helmet.js**: HTTP security headers
+- **CORS**: Configured cross-origin requests
+- **Photo Verification**: Dual photo system prevents fake reports
+- **Geolocation**: Ensures accurate incident location
+- **Request Validation**: Server-side input validation
+- **Error Handling**: Secure error messages in production
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a pull request
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-## License
+## 📝 License
 
-MIT License - feel free to use this project for your own purposes.
+This project is licensed under the MIT License.
 
-## Support
+## 🆘 Support
 
 For issues and questions:
 - Open an issue on GitHub
-- Check existing issues for solutions
-- Review troubleshooting section
+- Check existing documentation
+- Review Railway deployment logs
 
-## Acknowledgments
+## 🎯 Future Enhancements
 
-- face-api.js for face detection
-- Egyptian governorate data compiled from official sources
-- Icons and emojis for UI elements
+- [ ] SMS notifications to reporters
+- [ ] Real-time ambulance tracking
+- [ ] Admin dashboard for report management
+- [ ] Multi-language support
+- [ ] Voice notes recording
+- [ ] Automatic incident type detection (AI)
+- [ ] PWA support for offline capability
 
 ---
 
-**Note**: This is an emergency reporting system. Please use responsibly and only for genuine emergencies.
+Built with ❤️ for emergency response teams

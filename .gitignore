@@ -2,35 +2,32 @@
 node_modules/
 client/node_modules/
 
+# Production
+client/build/
+
 # Environment variables
 .env
 .env.local
-
-# Build output
-client/build/
-dist/
+.env.production
 
 # Logs
 *.log
 npm-debug.log*
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Uploads (temporary storage)
+# Uploads
 uploads/
 *.jpg
 *.jpeg
 *.png
-!client/public/*.png
-!client/public/*.jpg
+*.gif
 
-# Testing
-coverage/
+# Misc
+.cache/

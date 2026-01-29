@@ -1,347 +1,355 @@
-# 🚀 Deployment Guide - Vercel
+# 🚀 Deployment Guide
 
-This guide will help you deploy the Emergency Incident Reporter to Vercel for free hosting.
+## Railway Deployment (Recommended)
 
-## Prerequisites
+### Prerequisites
+- GitHub account
+- Railway account (sign up at [railway.app](https://railway.app))
+- Your code pushed to GitHub
 
-- GitHub account (free)
-- Vercel account (free) - Sign up at https://vercel.com
-- Git installed on your computer
+### Step-by-Step Deployment
 
----
-
-## Option 1: Deploy via Vercel CLI (Recommended)
-
-### Step 1: Install Vercel CLI
+#### 1. Push Your Code to GitHub
 
 ```bash
-npm install -g vercel
-```
-
-### Step 2: Login to Vercel
-
-```bash
-vercel login
-```
-
-This will open your browser to authenticate.
-
-### Step 3: Deploy
-
-```bash
-# From project root directory
-vercel
-```
-
-Follow the prompts:
-- **Set up and deploy?** Yes
-- **Which scope?** Select your account
-- **Link to existing project?** No
-- **Project name?** incident-reporter (or your choice)
-- **Directory?** ./ (press Enter)
-- **Override settings?** No
-
-### Step 4: Deploy to Production
-
-```bash
-vercel --prod
-```
-
-Your app will be deployed and you'll get a URL like:
-`https://incident-reporter.vercel.app`
-
----
-
-## Option 2: Deploy via GitHub + Vercel (Easier for Updates)
-
-### Step 1: Create GitHub Repository
-
-1. Go to https://github.com/new
-2. Repository name: `incident-reporter`
-3. Make it **Public** or **Private**
-4. Click "Create repository"
-
-### Step 2: Initialize Git and Push
-
-```bash
-# In your project directory
+# Initialize git repository (if not already done)
 git init
+
+# Add all files
 git add .
-git commit -m "Initial commit - Emergency Incident Reporter"
+
+# Commit changes
+git commit -m "Initial commit: Emergency Incident Reporter"
+
+# Create main branch
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/incident-reporter.git
+
+# Add your GitHub repository as remote
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+
+# Push to GitHub
 git push -u origin main
 ```
 
-Replace `YOUR_USERNAME` with your GitHub username.
+#### 2. Set Up Railway Project
 
-### Step 3: Connect to Vercel
+1. **Login to Railway**
+   - Go to https://railway.app
+   - Click "Login" and authenticate with GitHub
 
-1. Go to https://vercel.com/dashboard
-2. Click "Add New..." → "Project"
-3. Click "Import" next to your `incident-reporter` repository
-4. Configure:
-   - **Framework Preset:** Other
-   - **Build Command:** `npm run vercel-build`
-   - **Output Directory:** `client/build`
-   - **Install Command:** `npm install`
-5. Click "Deploy"
+2. **Create New Project**
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Authorize Railway to access your repositories
+   - Select your `incident-reporter` repository
 
-### Step 4: Configure Environment Variables (Optional)
+3. **Initial Deployment**
+   - Railway will automatically detect Node.js
+   - It will use the configurations from `railway.json` and `nixpacks.toml`
+   - Wait for the initial build to complete
 
-If you want to connect to a real ambulance API:
+#### 3. Add MongoDB Database
 
-1. Go to your Vercel project dashboard
-2. Click "Settings" → "Environment Variables"
-3. Add:
-   - `AMBULANCE_API_URL` = Your API URL
-   - `AMBULANCE_API_KEY` = Your API key
-   - `NODE_ENV` = production
-4. Click "Save"
-5. Redeploy from the "Deployments" tab
+1. **Add Database Service**
+   - In your project dashboard, click "+ New"
+   - Select "Database"
+   - Choose "Add MongoDB"
 
----
+2. **Connect to App**
+   - Railway automatically creates a MongoDB instance
+   - Go to MongoDB service → Variables
+   - Copy the `MONGO_URL` value
 
-## Important Notes for Vercel Deployment
+#### 4. Configure Environment Variables
 
-### 1. File Storage Limitation
+1. **Open Your App Service**
+   - Click on your main application service
+   - Go to "Variables" tab
 
-⚠️ **Vercel has read-only filesystem** - Uploaded photos won't persist between requests.
+2. **Add Required Variables**
 
-**Solutions:**
+   Click "New Variable" and add each of these:
 
-**Option A: Use Cloud Storage (Recommended for Production)**
+   ```
+   NODE_ENV=production
+   ```
 
-Install and configure cloud storage:
+   ```
+   MONGODB_URI=${{MongoDB.MONGO_URL}}
+   ```
+   (Railway will auto-link this to your MongoDB service)
+
+   ```
+   PORT=5000
+   ```
+
+   ```
+   GEOCODING_API_KEY=your_opencage_api_key_here
+   ```
+
+   ```
+   AMBULANCE_API_URL=https://your-ambulance-service.com/api/reports
+   ```
+
+   ```
+   AMBULANCE_API_KEY=your_ambulance_api_key_here
+   ```
+
+   ```
+   CLIENT_URL=${{RAILWAY_PUBLIC_DOMAIN}}
+   ```
+   (Or set to your custom domain)
+
+3. **Save Variables**
+   - Railway will automatically redeploy with new variables
+
+#### 5. Get Your API Keys
+
+##### OpenCage Geocoding API (Recommended - Free Tier)
+
+1. Go to https://opencagedata.com/api
+2. Click "Sign Up for Free"
+3. Verify your email
+4. Get your API key from dashboard
+5. Free tier includes 2,500 requests/day
+6. Add to Railway: `GEOCODING_API_KEY=your_key_here`
+
+##### Alternative: Google Maps Geocoding API
+
+1. Go to https://console.cloud.google.com/
+2. Create new project or select existing
+3. Enable "Geocoding API"
+4. Go to "Credentials" → "Create Credentials" → "API Key"
+5. Restrict the API key to Geocoding API only
+6. Update code in `server/services/geocodingService.js` (see comments)
+7. Add to Railway: `GEOCODING_API_KEY=your_google_key`
+
+#### 6. Set Up Ambulance Service (Optional)
+
+If you have an ambulance service API:
+
+1. Get API endpoint URL
+2. Get API authentication key
+3. Add to Railway variables:
+   ```
+   AMBULANCE_API_URL=https://api.ambulance-service.com/reports
+   AMBULANCE_API_KEY=your_ambulance_api_key
+   ```
+
+If you don't have one yet:
+- Leave these empty for now
+- The app will still work, but won't send notifications
+- You can add them later when ready
+
+#### 7. Verify Deployment
+
+1. **Get Your App URL**
+   - In Railway dashboard, find your app's domain
+   - Should be like: `https://incident-reporter-production.up.railway.app`
+
+2. **Test the Application**
+   - Open the URL in your browser
+   - Allow camera and location permissions
+   - Try submitting a test report
+
+3. **Check Logs**
+   - In Railway dashboard, click "Deployments"
+   - View logs to see if everything is working
+   - Look for: "Server running on port 5000"
+   - Look for: "MongoDB Connected"
+
+#### 8. Custom Domain (Optional)
+
+1. **Add Custom Domain**
+   - Go to your service settings
+   - Click "Settings" → "Domains"
+   - Click "Custom Domain"
+   - Add your domain (e.g., `reports.yourdomain.com`)
+
+2. **Configure DNS**
+   - Add CNAME record in your DNS provider
+   - Point to your Railway domain
+   - Wait for DNS propagation (can take up to 48 hours)
+
+3. **Update Environment Variables**
+   - Update `CLIENT_URL` to your custom domain
+
+## Alternative: Manual VPS Deployment
+
+### Using Ubuntu VPS (DigitalOcean, Linode, etc.)
+
+#### 1. Set Up Server
 
 ```bash
-npm install @vercel/blob
-# OR
-npm install aws-sdk  # For AWS S3
-# OR
-npm install @azure/storage-blob  # For Azure
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install MongoDB
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt update
+sudo apt install -y mongodb-org
+sudo systemctl start mongod
+sudo systemctl enable mongod
+
+# Install Nginx
+sudo apt install -y nginx
+
+# Install PM2 for process management
+sudo npm install -g pm2
 ```
 
-**Option B: Use Vercel Blob Storage (Easiest)**
+#### 2. Deploy Application
 
-Vercel provides free blob storage. Update `server/index.js`:
+```bash
+# Clone repository
+cd /var/www
+sudo git clone https://github.com/YOUR_USERNAME/incident-reporter.git
+cd incident-reporter
 
-```javascript
-const { put } = require('@vercel/blob');
+# Install dependencies
+sudo npm install
+cd client && sudo npm install && sudo npm run build && cd ..
 
-// In the upload handler
-const incidentBlob = await put(incidentFilename, incidentFile, {
-  access: 'public',
-});
+# Create .env file
+sudo nano .env
+# Add your environment variables (see .env.example)
+
+# Start with PM2
+sudo pm2 start server/index.js --name incident-reporter
+sudo pm2 startup
+sudo pm2 save
 ```
 
-**Option C: Send Photos Directly to Ambulance API**
+#### 3. Configure Nginx
 
-Modify the backend to send photos as base64 or multipart to your ambulance API immediately.
+```bash
+sudo nano /etc/nginx/sites-available/incident-reporter
+```
 
-### 2. Reports Database
+Add:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
 
-The `reports.json` file won't work on Vercel. Options:
-
-**Option A: Use a Free Database**
-- **Vercel Postgres** (free tier)
-- **MongoDB Atlas** (free tier)
-- **Supabase** (free tier)
-- **PlanetScale** (free tier)
-
-**Option B: Send All Data to External API**
-
-Configure your ambulance API and send all data there.
-
-### 3. Face Detection Models
-
-The models in `client/public/models/` will be deployed with your app. Vercel will serve them correctly.
-
----
-
-## Alternative: Deploy Backend and Frontend Separately
-
-### Backend Options
-
-1. **Railway** (https://railway.app) - Free tier with persistent storage
-2. **Render** (https://render.com) - Free tier with persistent storage
-3. **Heroku** - No longer has free tier
-4. **Fly.io** - Free tier available
-
-### Frontend on Vercel
-
-Deploy just the React frontend to Vercel and point it to your backend URL.
-
-Update `client/package.json`:
-```json
-{
-  "proxy": "https://your-backend-url.railway.app"
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
 }
 ```
 
-Or create `client/.env`:
-```
-REACT_APP_API_URL=https://your-backend-url.railway.app
-```
-
----
-
-## Post-Deployment Checklist
-
-After deployment:
-
-- [ ] Test camera access (requires HTTPS - Vercel provides this)
-- [ ] Test location access (requires HTTPS - Vercel provides this)
-- [ ] Test photo capture
-- [ ] Test face detection
-- [ ] Test report submission
-- [ ] Verify API integration (if configured)
-- [ ] Test on mobile device
-- [ ] Test on different browsers
-
----
-
-## Custom Domain (Optional)
-
-### Add Custom Domain to Vercel
-
-1. Go to Project Settings → Domains
-2. Add your domain (e.g., emergency.yourdomain.com)
-3. Follow DNS configuration instructions
-4. Vercel automatically provides SSL certificate
-
----
-
-## Monitoring and Logs
-
-### View Deployment Logs
-
-1. Go to Vercel Dashboard
-2. Select your project
-3. Click "Deployments"
-4. Click on any deployment to see logs
-
-### View Runtime Logs
-
-1. Go to Vercel Dashboard
-2. Select your project
-3. Click "Logs" tab
-4. View real-time application logs
-
----
-
-## Updating Your Deployment
-
-### With GitHub (Automatic)
-
-Just push to GitHub:
+Enable and restart:
 ```bash
-git add .
-git commit -m "Update message"
-git push
+sudo ln -s /etc/nginx/sites-available/incident-reporter /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
 ```
-
-Vercel automatically detects and redeploys.
-
-### With Vercel CLI
-
-```bash
-vercel --prod
-```
-
----
-
-## Cost
-
-**Free Tier Includes:**
-- ✅ Unlimited deployments
-- ✅ HTTPS/SSL certificates
-- ✅ 100GB bandwidth/month
-- ✅ Serverless functions
-- ✅ Automatic HTTPS
-- ✅ Custom domains
-
-**Limitations:**
-- 10-second serverless function timeout
-- 4.5GB storage
-- No persistent file storage
-
----
 
 ## Troubleshooting
 
-### Issue: Build fails
+### Common Issues
 
-**Check:**
-- All dependencies are in `package.json`
-- Build command is correct
-- Node version compatibility
+#### 1. Build Fails on Railway
 
-### Issue: API routes not working
+**Problem**: Build fails with npm errors
 
-**Check:**
-- `vercel.json` routes configuration
-- API endpoints use `/api/` prefix
-- CORS settings allow your domain
+**Solution**:
+- Check package.json for correct scripts
+- Ensure all dependencies are in package.json, not just devDependencies
+- Check Railway build logs for specific errors
 
-### Issue: Photos not saving
+#### 2. MongoDB Connection Fails
 
-**Solution:**
-- Use Vercel Blob Storage
-- Or use external cloud storage (AWS S3, Cloudinary)
-- Or send directly to ambulance API
+**Problem**: "MongoDB connection error"
 
-### Issue: Face detection not working
+**Solution**:
+- Verify MONGODB_URI is set correctly
+- Check MongoDB service is running
+- Ensure IP whitelisting (if using MongoDB Atlas)
 
-**Check:**
-- Models are in `client/public/models/`
-- Models are included in build
-- No 404 errors for model files
+#### 3. Camera Not Working
+
+**Problem**: Camera permission denied or not showing
+
+**Solution**:
+- Ensure HTTPS is enabled (required for camera access)
+- Railway provides HTTPS by default
+- Check browser permissions
+
+#### 4. Location Not Detected
+
+**Problem**: "Location not available"
+
+**Solution**:
+- Users must allow location permissions
+- HTTPS is required for geolocation
+- Some browsers block location on insecure contexts
+
+#### 5. Images Too Large
+
+**Problem**: "Request entity too large"
+
+**Solution**:
+- Images are base64 encoded and can be large
+- Current limit is 10MB (set in server/index.js)
+- Consider adding image compression if needed
+
+### Getting Help
+
+1. **Check Railway Logs**
+   ```
+   Railway Dashboard → Your Service → Deployments → View Logs
+   ```
+
+2. **Check MongoDB Connection**
+   - Ensure MongoDB service is healthy
+   - Check connection string format
+
+3. **Environment Variables**
+   - Verify all required variables are set
+   - No extra spaces in variable values
+
+4. **GitHub Issues**
+   - Open an issue with error details
+   - Include relevant logs (remove sensitive data)
+
+## Environment Variables Reference
+
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| NODE_ENV | Yes | Environment mode | `production` |
+| PORT | No | Server port (Railway sets automatically) | `5000` |
+| MONGODB_URI | Yes | MongoDB connection string | `mongodb://...` |
+| GEOCODING_API_KEY | Recommended | OpenCage or Google Maps API key | `your_key` |
+| AMBULANCE_API_URL | Optional | Ambulance service endpoint | `https://api.example.com` |
+| AMBULANCE_API_KEY | Optional | Ambulance service auth key | `your_key` |
+| CLIENT_URL | Optional | Frontend URL (for CORS) | `https://app.railway.app` |
+
+## Post-Deployment Checklist
+
+- [ ] Application is accessible via Railway URL
+- [ ] Camera permissions work
+- [ ] Location detection works
+- [ ] Can submit test report successfully
+- [ ] MongoDB stores reports correctly
+- [ ] Check logs for errors
+- [ ] Test on mobile device
+- [ ] Custom domain configured (if applicable)
+- [ ] SSL certificate is active (automatic on Railway)
+- [ ] Environment variables are set
+- [ ] Geocoding API is working
+- [ ] Ambulance service integration tested (if configured)
 
 ---
 
-## Alternative Hosting Options
-
-### 1. Netlify
-- Similar to Vercel
-- Great for static sites
-- Functions for backend
-
-### 2. Railway
-- Better for full-stack apps
-- Persistent storage
-- Free tier available
-
-### 3. Render
-- Good for Node.js apps
-- Persistent storage
-- Free tier (slower cold starts)
-
-### 4. Digital Ocean App Platform
-- $5/month minimum
-- Full persistent storage
-- More control
-
----
-
-## Recommended Production Setup
-
-For a production-ready deployment:
-
-1. **Frontend:** Vercel (free, fast, HTTPS)
-2. **Backend:** Railway or Render (persistent storage)
-3. **Database:** MongoDB Atlas or Supabase (free tier)
-4. **Photos:** AWS S3, Cloudinary, or Vercel Blob
-5. **Monitoring:** Vercel Analytics + Sentry for errors
-
----
-
-## Need Help?
-
-- **Vercel Docs:** https://vercel.com/docs
-- **Vercel Discord:** https://vercel.com/discord
-- **GitHub Issues:** Create issues in your repository
-
----
-
-**🎉 Your app will be live at: `https://your-project.vercel.app`**
+Need help? Check the logs, review environment variables, or open an issue on GitHub!

@@ -1,8 +1,0 @@
-node_modules
-client/node_modules
-.env
-.env.local
-uploads
-reports.json
-*.log
-.DS_Store

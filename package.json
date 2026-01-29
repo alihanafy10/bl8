@@ -1,19 +1,17 @@
 {
   "name": "incident-reporter",
   "version": "1.0.0",
-  "description": "Web application for incident reporting with photo capture and location tracking",
+  "description": "Emergency incident reporting system with photo verification",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
     "client": "cd client && npm start",
-    "build": "cd client && CI=false npm run build",
-    "install-all": "npm install && cd client && npm install",
-    "vercel-build": "npm install && cd client && npm install && CI=false npm run build",
-    "postinstall": "cd client && npm install"
+    "build": "cd client && npm run build",
+    "start": "node server/index.js",
+    "install-all": "npm install && cd client && npm install"
   },
-  "keywords": ["incident", "emergency", "reporting", "ambulance"],
+  "keywords": ["emergency", "incident", "reporting", "ambulance"],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -21,10 +19,13 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "multer": "^1.4.5-lts.1",
-    "axios": "^1.6.0"
+    "mongoose": "^8.0.3",
+    "axios": "^1.6.2",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.0.2",
     "concurrently": "^8.2.2"
   }
 }
