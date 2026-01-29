@@ -1,6 +1,9 @@
+# Only ignore development files
 node_modules
-server
 .env.local
 .env.development
 *.log
 .DS_Store
+
+# Keep server folder for reference but Vercel uses api/ folder
+server
