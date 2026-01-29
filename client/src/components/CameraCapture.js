@@ -197,7 +197,13 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
             <div className="photo-placeholder">
               {currentCapture === 'incident' && isCameraActive ? (
                 <div className="camera-view">
-                  <video ref={videoRef} autoPlay playsInline />
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                   <div className="camera-controls">
                     <button className="btn btn-primary" onClick={capturePhoto}>
                       📷 Capture Incident
@@ -233,7 +239,13 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
             <div className="photo-placeholder">
               {currentCapture === 'face' && isCameraActive ? (
                 <div className="camera-view">
-                  <video ref={videoRef} autoPlay playsInline />
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
                   {detectionStatus && (
                     <div className="detection-status">{detectionStatus}</div>
                   )}
