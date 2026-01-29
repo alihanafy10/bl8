@@ -11,7 +11,6 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
   const [detectionStatus, setDetectionStatus] = useState('');
 
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
 
   // Load face detection models
   useEffect(() => {
