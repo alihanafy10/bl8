@@ -124,7 +124,20 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
 
   // Capture photo
   const capturePhoto = async () => {
-    if (!videoRef.current) return;
+    console.log('Capture photo clicked');
+    
+    if (!videoRef.current) {
+      console.error('Video ref not available');
+      setError('Camera not ready. Please try again.');
+      return;
+    }
+
+    // Check if video is actually playing
+    if (videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+      console.error('Video not ready yet');
+      setError('Camera is loading. Please wait a moment and try again.');
+      return;
+    }
 
     setError('');
     setDetectionStatus('');
@@ -142,29 +155,46 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
       setDetectionStatus('Face detected! ✓');
     }
 
-    // Create canvas and capture image
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoRef.current, 0, 0);
+    try {
+      // Create canvas and capture image
+      const canvas = document.createElement('canvas');
+      const video = videoRef.current;
+      
+      // Ensure we have valid dimensions
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], `${currentCapture}-photo.jpg`, { type: 'image/jpeg' });
-        
-        if (currentCapture === 'incident') {
-          updateReportData({ incidentPhoto: file });
-          setCurrentCapture('face');
-          stopCamera();
-          setDetectionStatus('');
+      // Convert to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          console.log('Photo captured successfully', blob.size, 'bytes');
+          const file = new File([blob], `${currentCapture}-photo.jpg`, { type: 'image/jpeg' });
+          
+          if (currentCapture === 'incident') {
+            updateReportData({ incidentPhoto: file });
+            setCurrentCapture('face');
+            stopCamera();
+            setDetectionStatus('');
+            setError(''); // Clear any errors
+          } else {
+            updateReportData({ facePhoto: file });
+            stopCamera();
+            setError(''); // Clear any errors
+          }
         } else {
-          updateReportData({ facePhoto: file });
-          stopCamera();
+          console.error('Failed to create blob');
+          setError('Failed to capture photo. Please try again.');
         }
-      }
-    }, 'image/jpeg', 0.9);
+      }, 'image/jpeg', 0.9);
+    } catch (err) {
+      console.error('Error capturing photo:', err);
+      setError('Failed to capture photo: ' + err.message);
+    }
   };
 
   // Retake photo
