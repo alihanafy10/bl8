@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import SimpleCameraCapture from './components/SimpleCameraCapture';
+import CameraCapture from './components/CameraCapture';
 import LocationSelector from './components/LocationSelector';
 import ReportSubmission from './components/ReportSubmission';
 import './App.css';
@@ -43,7 +43,7 @@ function App() {
     switch (step) {
       case 1:
         return (
-          <CameraCapture
+          <SimpleCameraCapture
             reportData={reportData}
             updateReportData={updateReportData}
             nextStep={nextStep}

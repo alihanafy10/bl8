@@ -3,12 +3,36 @@ import * as faceapi from 'face-api.js';
 import './CameraCapture.css';
 
 function CameraCapture({ reportData, updateReportData, nextStep }) {
-  const [currentCapture, setCurrentCapture] = useState('incident'); // 'incident' or 'face'
-  const [stream, setStream] = useState(null);
   const [error, setError] = useState('');
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const [detectionStatus, setDetectionStatus] = useState('');
+
+  // Handle file input for incident photo
+  const handleIncidentPhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      updateReportData({ incidentPhoto: file });
+      setError('');
+    }
+  };
+
+  // Handle file input for face photo
+  const handleFacePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      updateReportData({ facePhoto: file });
+      setError('');
+    }
+  };
+
+  // Retake photo
+  const retakePhoto = (type) => {
+    if (type === 'incident') {
+      updateReportData({ incidentPhoto: null });
+    } else {
+      updateReportData({ facePhoto: null });
+    }
+  };
+
+  const canProceed = reportData.incidentPhoto && reportData.facePhoto;
 
   const videoRef = useRef(null);
 
@@ -216,7 +240,7 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
     <div className="camera-capture">
       <h2 className="step-title">📸 Capture Photos</h2>
       <p className="step-description">
-        First, photograph the incident. Then, take a selfie to verify your identity.
+        Take a photo of the incident and a selfie for verification.
       </p>
 
       <div className="capture-container">
@@ -225,7 +249,37 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
           <h3>1. Incident Photo</h3>
           {!reportData.incidentPhoto ? (
             <div className="photo-placeholder">
-              {currentCapture === 'incident' && isCameraActive ? (
+              <div className="start-camera">
+                <div className="placeholder-icon">🏥</div>
+                <label htmlFor="incident-photo-input" className="btn btn-primary" style={{ cursor: 'pointer', display: 'inline-block' }}>
+                  📷 Take Photo
+                </label>
+                <input
+                  id="incident-photo-input"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleIncidentPhotoChange}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="photo-preview">
+              <img src={URL.createObjectURL(reportData.incidentPhoto)} alt="Incident" />
+              <button className="btn btn-secondary" onClick={() => retakePhoto('incident')}>
+                Retake
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Face Photo */}
+        <div className="capture-section">
+          <h3>2. Your Face (Verification)</h3>
+          {!reportData.facePhoto ? (
+            <div className="photo-placeholder">
+              {false ? (
                 <div className="camera-view">
                   <video 
                     ref={videoRef} 
