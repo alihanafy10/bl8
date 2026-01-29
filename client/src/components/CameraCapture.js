@@ -31,19 +31,60 @@ function CameraCapture({ reportData, updateReportData, nextStep }) {
   const startCamera = async () => {
     try {
       setError('');
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
+      
+      // Try with preferred camera first
+      let constraints = {
         video: { facingMode: currentCapture === 'face' ? 'user' : 'environment' },
         audio: false
-      });
+      };
+      
+      let mediaStream;
+      
+      try {
+        // Try preferred camera (rear for incident, front for face)
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (firstError) {
+        console.log('Preferred camera not available, trying any camera...', firstError);
+        
+        // Fallback: try any available camera
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        } catch (secondError) {
+          // Last resort: try front camera explicitly
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'user' },
+            audio: false
+          });
+        }
+      }
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().catch(err => {
+            console.error('Error playing video:', err);
+            setError('Camera started but video preview failed. Try refreshing the page.');
+          });
+        };
         setStream(mediaStream);
         setIsCameraActive(true);
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please ensure camera permissions are granted.');
+      
+      // Provide specific error messages
+      if (err.name === 'NotAllowedError') {
+        setError('Camera permission denied. Please allow camera access in your browser settings and refresh the page.');
+      } else if (err.name === 'NotFoundError') {
+        setError('No camera found. Please ensure your device has a camera connected.');
+      } else if (err.name === 'NotReadableError') {
+        setError('Camera is in use by another application. Please close other apps using the camera.');
+      } else {
+        setError('Unable to access camera: ' + err.message);
+      }
     }
   };
 
