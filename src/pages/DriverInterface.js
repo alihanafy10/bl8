@@ -14,6 +14,7 @@ const DriverInterface = () => {
     if (ambulanceId) {
       loadActiveDispatch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ambulanceId]);
 
   const loadActiveDispatch = async () => {
