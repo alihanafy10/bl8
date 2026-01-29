@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import axios from 'axios';
+import API_BASE_URL from '../config';
 import './IncidentReporter.css';
 
 const IncidentReporter = ({ onSubmitSuccess }) => {
@@ -75,7 +76,7 @@ const IncidentReporter = ({ onSubmitSuccess }) => {
     setError('');
 
     try {
-      const response = await axios.post('/api/reports', {
+      const response = await axios.post(`${API_BASE_URL}/reports`, {
         incidentPhoto,
         faceVerificationPhoto: facePhoto,
         location,
